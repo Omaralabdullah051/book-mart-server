@@ -19,13 +19,21 @@ const run = async () => {
         const bookCollection = client.db('inventoryManagement').collection("book");
         const imageCollection = client.db('inventoryManagement').collection('image');
 
+        //POST API TO STORE BOOKS INFORMATION
         app.post('/books', async (req, res) => {
             const bookInfo = req.body;
             if (bookInfo.bookName && bookInfo.imgUrl && bookInfo.discription && bookInfo.bookPrice && bookInfo.quantity && bookInfo.suplierName) {
-                const result = await bookCollection.insertOne(bookInfo);
+                await bookCollection.insertOne(bookInfo);
                 return res.send({ success: true, message: `${bookInfo.bookName} added successfully` });
             }
             res.send({ success: false, message: "Please Insert all the information" });
+        })
+
+        //GET API TO GET BOOKS INFORMATION
+        app.get('/books', async (req, res) => {
+            const cursor = bookCollection.find({});
+            const books = await cursor.toArray();
+            res.send(books);
         })
 
     }
