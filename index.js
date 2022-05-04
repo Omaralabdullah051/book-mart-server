@@ -36,12 +36,27 @@ const run = async () => {
             res.send(books);
         })
 
-        //GET API TO GET SPECIFIC BOOKS INFORMATION
+        //GET API TO GET SPECIFIC BOOK INFORMATION
         app.get('/books/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const item = await bookCollection.findOne(query);
             res.send(item);
+        })
+
+        // PUT API TO UPDATE SPECIFIC BOOK INFORMATION
+        app.put('/books/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedQuantity = req.body;
+            const filter = { _id: ObjectId(id) };
+            const option = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    quantity: updatedQuantity.quantity
+                }
+            };
+            const result = await bookCollection.updateOne(filter, updatedDoc, option);
+            res.send(result);
         })
 
     }
