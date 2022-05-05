@@ -22,7 +22,7 @@ const run = async () => {
         //POST API TO STORE BOOKS INFORMATION
         app.post('/books', async (req, res) => {
             const bookInfo = req.body;
-            if (bookInfo.bookName && bookInfo.imgUrl && bookInfo.discription && bookInfo.bookPrice && bookInfo.quantity && bookInfo.suplierName) {
+            if (bookInfo.bookName && bookInfo.imgUrl && bookInfo.discription && bookInfo.bookPrice && bookInfo.quantity && bookInfo.supplierName) {
                 await bookCollection.insertOne(bookInfo);
                 return res.send({ success: true, message: `${bookInfo.bookName} added successfully` });
             }
@@ -57,6 +57,16 @@ const run = async () => {
             };
             const result = await bookCollection.updateOne(filter, updatedDoc, option);
             res.send(result);
+        })
+
+        //DELETE API TO DELETE SPECIFIC BOOK INFORMATION
+        app.delete('/books', async (req, res) => {
+            const id = req.query.id;
+            if (id) {
+                const query = { _id: ObjectId(id) };
+                const result = await bookCollection.deleteOne(query);
+                res.send(result);
+            }
         })
 
     }
