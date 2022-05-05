@@ -17,7 +17,7 @@ const run = async () => {
     try {
         await client.connect();
         const bookCollection = client.db('inventoryManagement').collection("book");
-        const imageCollection = client.db('inventoryManagement').collection('image');
+        const advantagesCollection = client.db('inventoryManagement').collection('advantages');
 
         //POST API TO STORE BOOKS INFORMATION
         app.post('/books', async (req, res) => {
@@ -47,7 +47,6 @@ const run = async () => {
         //GET API TO GET SPECIFIC BOOK INFORMATION BY EMAIL
         app.get('/booksbyemail', async (req, res) => {
             const email = req.query.email;
-            console.log(email);
             if (email) {
                 const query = { email };
                 const cursor = bookCollection.find(query);
@@ -79,6 +78,13 @@ const run = async () => {
                 const result = await bookCollection.deleteOne(query);
                 res.send(result);
             }
+        })
+
+        //GET API TO GET ALL AVANTAGES INFORMATION
+        app.get('/advantages', async (req, res) => {
+            const cursor = advantagesCollection.find({});
+            const books = await cursor.toArray();
+            res.send(books);
         })
 
     }
