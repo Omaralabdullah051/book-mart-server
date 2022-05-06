@@ -34,6 +34,8 @@ const run = async () => {
         await client.connect();
         const bookCollection = client.db('inventoryManagement').collection("book");
         const advantagesCollection = client.db('inventoryManagement').collection('advantages');
+        const informationsCollection = client.db('inventoryManagement').collection('informations');
+        const membersCollection = client.db('inventoryManagement').collection('members');
 
         //GET API TO CREATE ACCESS TOKEN TO SEND TO THE CLIENT
         app.get('/login', async (req, res) => {
@@ -61,7 +63,7 @@ const run = async () => {
             res.send(books);
         })
 
-        //GET API TO GET ALL BOOKS INFORMATION BY VERIFYING JWT AND IMPLEMENTED PAGINATION
+        //GET API TO GET BOOKS INFORMATION BY VERIFYING JWT AND IMPLEMENTED PAGINATION
         app.get('/getbooks', verifyJWT, async (req, res) => {
             const decodedEmail = req.decoded.email;
             const email = req.query.email;
@@ -147,8 +149,22 @@ const run = async () => {
         //GET API TO GET ALL ADVANTAGES INFORMATION
         app.get('/advantages', async (req, res) => {
             const cursor = advantagesCollection.find({});
-            const books = await cursor.toArray();
-            res.send(books);
+            const advantages = await cursor.toArray();
+            res.send(advantages);
+        })
+
+        //GET API TO GET ALL INFORMATIONS
+        app.get('/informations', async (req, res) => {
+            const cursor = informationsCollection.find({});
+            const informations = await cursor.toArray();
+            res.send(informations);
+        })
+
+        //GET API TO GET ALL MEMBERS
+        app.get('/members', async (req, res) => {
+            const cursor = membersCollection.find({});
+            const members = await cursor.toArray();
+            res.send(members);
         })
 
     }
