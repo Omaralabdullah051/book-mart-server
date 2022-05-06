@@ -21,7 +21,6 @@ const verifyJWT = (req, res, next) => {
             return res.status(403).send({ message: "Forbidden access" });
         }
         req.decoded = decoded;
-        console.log(decoded.email);
         next();
     })
 }
@@ -62,14 +61,23 @@ const run = async () => {
             res.send(books);
         })
 
-        //GET API TO GET ALL BOOKS INFORMATION by verifying jwt
+        //GET API TO GET ALL BOOKS INFORMATION BY VERIFYING JWT AND IMPLEMENTED PAGINATION
         app.get('/getbooks', verifyJWT, async (req, res) => {
             const decodedEmail = req.decoded.email;
             const email = req.query.email;
             if (email === decodedEmail) {
-                const cursor = bookCollection.find({});
-                const books = await cursor.toArray();
-                res.send(books);
+                const pages = parseInt(req.query.pages);
+                const size = parseInt(req.query.size);
+                if (pages || size) {
+                    const cursor = bookCollection.find({});
+                    const books = await cursor.skip(pages * size).limit(size).toArray();
+                    res.send({ books, count: await bookCollection.estimatedDocumentCount() });
+                }
+                else {
+                    const cursor = bookCollection.find({});
+                    const books = await cursor.toArray();
+                    res.send({ books });
+                }
             }
             else {
                 res.status(403).send({ message: 'Forbidden Access' });
