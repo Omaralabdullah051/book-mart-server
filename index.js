@@ -36,6 +36,7 @@ const run = async () => {
         const advantagesCollection = client.db('inventoryManagement').collection('advantages');
         const informationsCollection = client.db('inventoryManagement').collection('informations');
         const membersCollection = client.db('inventoryManagement').collection('members');
+        const servicesCollection = client.db('inventoryManagement').collection('services');
 
         //GET API TO CREATE ACCESS TOKEN TO SEND TO THE CLIENT
         app.get('/login', async (req, res) => {
@@ -165,6 +166,13 @@ const run = async () => {
             const cursor = membersCollection.find({});
             const members = await cursor.toArray();
             res.send(members);
+        })
+
+        //GET API TO GET ALL SEVICES
+        app.get('/services', async (req, res) => {
+            const cursor = servicesCollection.find({});
+            const services = await cursor.toArray();
+            res.send(services);
         })
 
     }
