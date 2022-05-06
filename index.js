@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 5000;
+const jwt = require('jsonwebtoken');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 //middleware
@@ -8,8 +10,23 @@ const cors = require('cors');
 app.use(cors());
 app.use(express.json());
 
+const verifyJWT = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(404).send({ message: "Unauthorized access" });
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(403).send({ message: "Forbidden access" });
+        }
+        req.decoded = decoded;
+        console.log(decoded.email);
+        next();
+    })
+}
 
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ztcrb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -18,6 +35,15 @@ const run = async () => {
         await client.connect();
         const bookCollection = client.db('inventoryManagement').collection("book");
         const advantagesCollection = client.db('inventoryManagement').collection('advantages');
+
+        //GET API TO CREATE ACCESS TOKEN TO SEND TO THE CLIENT
+        app.get('/login', async (req, res) => {
+            const user = req.query;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '1d'
+            });
+            res.send({ accessToken });
+        })
 
         //POST API TO STORE BOOKS INFORMATION
         app.post('/books', async (req, res) => {
@@ -36,6 +62,32 @@ const run = async () => {
             res.send(books);
         })
 
+        //GET API TO GET ALL BOOKS INFORMATION by verifying jwt
+        app.get('/getbooks', verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
+            const email = req.query.email;
+            if (email === decodedEmail) {
+                const cursor = bookCollection.find({});
+                const books = await cursor.toArray();
+                res.send(books);
+            }
+            else {
+                res.status(403).send({ message: 'Forbidden Access' });
+            }
+        })
+
+        //GET API TO VERIFY JWT
+        app.get('/addinventory', verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
+            const email = req.query.email;
+            if (email === decodedEmail) {
+                res.send({ message: 'success' });
+            }
+            else {
+                res.status(403).send({ message: 'Forbidden Access' });
+            }
+        })
+
         //GET API TO GET SPECIFIC BOOK INFORMATION BY ID
         app.get('/books/:id', async (req, res) => {
             const id = req.params.id;
@@ -45,13 +97,17 @@ const run = async () => {
         })
 
         //GET API TO GET SPECIFIC BOOK INFORMATION BY EMAIL
-        app.get('/booksbyemail', async (req, res) => {
+        app.get('/booksbyemail', verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
             const email = req.query.email;
-            if (email) {
+            if (email === decodedEmail) {
                 const query = { email };
                 const cursor = bookCollection.find(query);
                 const books = await cursor.toArray();
                 res.send(books);
+            }
+            else {
+                res.status(403).send({ message: 'Forbidden Access' });
             }
         })
 
@@ -80,7 +136,7 @@ const run = async () => {
             }
         })
 
-        //GET API TO GET ALL AVANTAGES INFORMATION
+        //GET API TO GET ALL ADVANTAGES INFORMATION
         app.get('/advantages', async (req, res) => {
             const cursor = advantagesCollection.find({});
             const books = await cursor.toArray();
