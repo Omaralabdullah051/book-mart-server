@@ -7,7 +7,13 @@ require('dotenv').config();
 
 //middleware
 const cors = require('cors');
-app.use(cors());
+// app.use(cors());
+const corsConfig = {
+    origin: true,
+    credential: true
+}
+app.use(cors(corsConfig));
+app.options('*', cors(corsConfig));
 app.use(express.json());
 
 const verifyJWT = (req, res, next) => {
