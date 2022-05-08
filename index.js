@@ -10,7 +10,7 @@ const cors = require('cors');
 // app.use(cors());
 const corsConfig = {
     origin: true,
-    credential: true
+    credentials: true
 }
 app.use(cors(corsConfig));
 app.options('*', cors(corsConfig));
