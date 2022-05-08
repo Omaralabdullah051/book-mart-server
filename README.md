@@ -17,7 +17,7 @@ In the overall project, you will found:
 
  - I created my own middleware to verify JWT.
 
-## List of teachnologies && functionality that I used and implemented in my project:
+## List of teachnologies & functionality that I used and implemented in my project:
 
 In the overall project, you will found:
 
