@@ -41,12 +41,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-function sendOrderConfirmationEmail(bookInfo, userName) {
-  const { email, bookName, supplierName, bookPrice } = bookInfo;
+function sendOrderConfirmationEmail(bookInfo, userName, userEmail) {
+  const { bookName, supplierName, bookPrice } = bookInfo;
 
   const emailTemplate = {
     from: process.env.EMAIL_SENDER,
-    to: email,
+    to: userEmail,
     subject: `Your order for ${bookName} is confirmed`,
     text: `Your order for ${bookName} is confirmed`,
     html: `
@@ -60,7 +60,7 @@ function sendOrderConfirmationEmail(bookInfo, userName) {
         <h3>Further Contact Info:</h3>
         <p>Omar Al Abdullah</p>
         <p>omaralabdullah051@gmail.com</p>
-        <a href="https://i.postimg.cc/q7NnDHYn/instagram.png">Facebook</a>
+        <a href="https://www.instagram.com/ab_omar.7/">Facebook</a>
         <a href="https://www.facebook.com/profile.php?id=100048860175423">Instagram</a>
       </div>
     `,
@@ -211,7 +211,11 @@ const run = async () => {
         },
       };
       const result = await bookCollection.updateOne(filter, updatedDoc, option);
-      sendOrderConfirmationEmail(req.body.bookInfo, req.body.userName.name);
+      sendOrderConfirmationEmail(
+        req.body.bookInfo,
+        req.body.userName.name,
+        req.body.userEmail.emailUser
+      );
       res.send(result);
     });
 
