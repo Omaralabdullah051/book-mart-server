@@ -203,7 +203,6 @@ const run = async () => {
     app.put("/books/:id", async (req, res) => {
       const id = req.params.id;
       const updatedQuantity = req.body.updatedQuantity;
-      console.log(req.body);
       const filter = { _id: ObjectId(id) };
       const option = { upsert: true };
       const updatedDoc = {
@@ -217,6 +216,21 @@ const run = async () => {
         req.body.userName.name,
         req.body.userEmail.emailUser
       );
+      res.send(result);
+    });
+
+    // PUT API TO UPDATE SPECIFIC BOOK INFORMATION
+    app.put("/books/restock/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedQuantity = req.body;
+      const filter = { _id: ObjectId(id) };
+      const option = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          quantity: updatedQuantity.quantity,
+        },
+      };
+      const result = await bookCollection.updateOne(filter, updatedDoc, option);
       res.send(result);
     });
 
