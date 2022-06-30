@@ -3,6 +3,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 //middleware
@@ -30,6 +31,49 @@ const verifyJWT = (req, res, next) => {
     next();
   });
 };
+
+//*for sending email
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_SENDER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+function sendOrderConfirmationEmail(bookInfo, userName) {
+  const { email, bookName, supplierName, bookPrice } = bookInfo;
+
+  const emailTemplate = {
+    from: process.env.EMAIL_SENDER,
+    to: email,
+    subject: `Your order for ${bookName} is confirmed`,
+    text: `Your order for ${bookName} is confirmed`,
+    html: `
+      <div>
+        <p> Hello ${userName}, </p>
+        <h3>Your order for ${bookName} is confirmed</h3>
+        <h4>The book price is $${bookPrice}</h4>
+        <h4>Supplied by ${supplierName}</h4>
+        <p>Looking forward to see your response</p>
+
+        <h3>Further Contact Info:</h3>
+        <p>Omar Al Abdullah</p>
+        <p>omaralabdullah051@gmail.com</p>
+        <a href="https://i.postimg.cc/q7NnDHYn/instagram.png">Facebook</a>
+        <a href="https://www.facebook.com/profile.php?id=100048860175423">Instagram</a>
+      </div>
+    `,
+  };
+
+  transporter.sendMail(emailTemplate, function (err, info) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("Email sent:" + info);
+    }
+  });
+}
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ztcrb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -157,7 +201,8 @@ const run = async () => {
     // PUT API TO UPDATE SPECIFIC BOOK INFORMATION
     app.put("/books/:id", async (req, res) => {
       const id = req.params.id;
-      const updatedQuantity = req.body;
+      const updatedQuantity = req.body.updatedQuantity;
+      console.log(req.body);
       const filter = { _id: ObjectId(id) };
       const option = { upsert: true };
       const updatedDoc = {
@@ -166,6 +211,7 @@ const run = async () => {
         },
       };
       const result = await bookCollection.updateOne(filter, updatedDoc, option);
+      sendOrderConfirmationEmail(req.body.bookInfo, req.body.userName.name);
       res.send(result);
     });
 
