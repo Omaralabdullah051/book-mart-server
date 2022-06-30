@@ -42,7 +42,7 @@ const transporter = nodemailer.createTransport({
 });
 
 function sendOrderConfirmationEmail(bookInfo, userName, userEmail) {
-  const { bookName, supplierName, bookPrice } = bookInfo;
+  const { bookName, supplierName, bookPrice, imgUrl } = bookInfo;
 
   const emailTemplate = {
     from: process.env.EMAIL_SENDER,
@@ -51,6 +51,7 @@ function sendOrderConfirmationEmail(bookInfo, userName, userEmail) {
     text: `Your order for ${bookName} is confirmed`,
     html: `
       <div>
+        <img src=${imgUrl} alt=""/>
         <p> Hello ${userName}, </p>
         <h3>Your order for ${bookName} is confirmed</h3>
         <h4>The book price is $${bookPrice}</h4>
